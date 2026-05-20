@@ -18,7 +18,7 @@ func main() {
 			os.Exit(1)
 		}
 
-		cmd := command[:len(command)-1]
+		cmd := strings.TrimSpace(command)
 
 		if strings.ToLower(cmd) == "exit" {
 			break
