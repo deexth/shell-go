@@ -24,6 +24,11 @@ func main() {
 			break
 		}
 
+		if msg, ok := strings.CutPrefix(cmd, "echo "); ok {
+			fmt.Fprintln(os.Stdout, msg)
+			continue
+		}
+
 		fmt.Fprintf(os.Stderr, "%s: command not found\n", cmd)
 	}
 }
