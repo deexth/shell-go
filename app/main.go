@@ -36,13 +36,8 @@ func main() {
 		}
 
 		if msg, ok := checkPrefix(cmd, "type "); ok {
-			if _, ok = commands[msg]; ok {
-				fmt.Fprintln(os.Stdout, msg, "is a shell builtin")
-				continue
-			} else {
-				fmt.Fprintf(os.Stderr, "%s: not found\n", msg)
-				continue
-			}
+			handleType(msg)
+			continue
 		}
 
 		fmt.Fprintf(os.Stderr, "%s: command not found\n", cmd)
@@ -51,4 +46,13 @@ func main() {
 
 func checkPrefix(input, cmd string) (string, bool) {
 	return strings.CutPrefix(input, cmd)
+}
+
+func handleType(msg string) {
+	if _, ok := commands[msg]; ok {
+		fmt.Fprintln(os.Stdout, msg, "is a shell builtin")
+	} else {
+		fmt.Fprintf(os.Stderr, "%s: not found\n", msg)
+	}
+
 }
