@@ -40,7 +40,7 @@ func main() {
 				fmt.Fprintln(os.Stdout, msg, "is a shell builtin")
 				continue
 			} else {
-				fmt.Fprintf(os.Stderr, "%s: command not found\n", msg)
+				fmt.Fprintf(os.Stderr, "%s: not found\n", msg)
 				continue
 			}
 		}
