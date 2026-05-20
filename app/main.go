@@ -7,6 +7,12 @@ import (
 	"strings"
 )
 
+var commands = map[string]struct{}{
+	"echo": {},
+	"type": {},
+	"exit": {},
+}
+
 func main() {
 	reader := bufio.NewReader(os.Stdin)
 
@@ -24,11 +30,25 @@ func main() {
 			break
 		}
 
-		if msg, ok := strings.CutPrefix(cmd, "echo "); ok {
+		if msg, ok := checkPrefix(cmd, "echo "); ok {
 			fmt.Fprintln(os.Stdout, msg)
 			continue
 		}
 
+		if msg, ok := checkPrefix(cmd, "type "); ok {
+			if _, ok = commands[msg]; ok {
+				fmt.Fprintln(os.Stdout, msg, "is a shell builtin")
+				continue
+			} else {
+				fmt.Fprintf(os.Stderr, "%s: command not found\n", msg)
+				continue
+			}
+		}
+
 		fmt.Fprintf(os.Stderr, "%s: command not found\n", cmd)
 	}
+}
+
+func checkPrefix(input, cmd string) (string, bool) {
+	return strings.CutPrefix(input, cmd)
 }
