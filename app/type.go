@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -18,21 +17,16 @@ func handleType(msg, path string) {
 
 func handlePath(path, msg string) {
 	for dir := range strings.SplitSeq(path, ":") {
-		err := filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
-			if err != nil {
-				return err
-			}
-
-			if !d.IsDir() && d.Type().IsRegular() && d.Name() == msg {
-				fmt.Fprintln(os.Stdin, msg, " is ", path)
-			}
-
-			fmt.Fprintf(os.Stderr, "%s: not found\n", msg)
-			return nil
-
-		})
+		fullPath := filepath.Join(dir, msg)
+		f, err := os.Stat(fullPath)
 		if err != nil {
 			continue
 		}
+
+		if f.Mode().Perm()&0111 != 0 {
+			fmt.Fprintf(os.Stdout, "%s is %s\n", msg, fullPath)
+		}
+
+		fmt.Fprintln(os.Stderr, msg, " : not found")
 	}
 }
