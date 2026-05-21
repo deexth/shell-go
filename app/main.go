@@ -14,6 +14,10 @@ var commands = map[string]struct{}{
 }
 
 func main() {
+	path, ok := os.LookupEnv("PATH")
+	if !ok {
+		fmt.Fprintln(os.Stderr, "PATH not provided")
+	}
 	reader := bufio.NewReader(os.Stdin)
 
 	for {
@@ -36,7 +40,7 @@ func main() {
 		}
 
 		if msg, ok := checkPrefix(cmd, "type "); ok {
-			handleType(msg)
+			handleType(msg, path)
 			continue
 		}
 
@@ -46,13 +50,4 @@ func main() {
 
 func checkPrefix(input, cmd string) (string, bool) {
 	return strings.CutPrefix(input, cmd)
-}
-
-func handleType(msg string) {
-	if _, ok := commands[msg]; ok {
-		fmt.Fprintln(os.Stdout, msg, "is a shell builtin")
-	} else {
-		fmt.Fprintf(os.Stderr, "%s: not found\n", msg)
-	}
-
 }
