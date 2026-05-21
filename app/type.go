@@ -25,7 +25,7 @@ func handlePath(path, msg string) {
 
 		if f.Mode().Perm()&0111 != 0 {
 			fmt.Fprintf(os.Stdout, "%s is %s\n", msg, fullPath)
-			break
+			return
 		} else {
 			continue
 		}
