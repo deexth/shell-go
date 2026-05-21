@@ -23,7 +23,7 @@ func handlePath(path, msg string) {
 				return err
 			}
 
-			if d.Type().IsRegular() && d.Name() == msg {
+			if !d.IsDir() && d.Type().IsRegular() && d.Name() == msg {
 				fmt.Fprintln(os.Stdin, msg, " is ", path)
 			}
 
