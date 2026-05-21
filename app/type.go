@@ -27,6 +27,6 @@ func handlePath(path, msg string) {
 			fmt.Fprintf(os.Stdout, "%s is %s\n", msg, fullPath)
 		}
 
-		fmt.Fprintln(os.Stderr, msg, " : not found")
+		fmt.Fprintln(os.Stderr, msg, ": not found")
 	}
 }
