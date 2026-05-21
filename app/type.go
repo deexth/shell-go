@@ -26,6 +26,8 @@ func handlePath(path, msg string) {
 		if f.Mode().Perm()&0111 != 0 {
 			fmt.Fprintf(os.Stdout, "%s is %s\n", msg, fullPath)
 			break
+		} else if f.Mode().Perm()&0111 == 0 {
+			continue
 		}
 
 		fmt.Fprintf(os.Stderr, "%s: not found\n", msg)
