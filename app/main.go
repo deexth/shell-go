@@ -44,6 +44,8 @@ func main() {
 			continue
 		}
 
+		handleExecutable(path, strings.ToLower(cmd))
+
 		fmt.Fprintf(os.Stderr, "%s: command not found\n", cmd)
 	}
 }
