@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"path/filepath"
 	"strings"
 )
 
@@ -55,30 +54,30 @@ func checkPrefix(input, cmd string) (string, bool) {
 	return strings.CutPrefix(input, cmd)
 }
 
-func handleType(msg, path string) {
-	if _, ok := commands[msg]; ok {
-		fmt.Fprintln(os.Stdout, msg, "is a shell builtin")
-	} else {
-		handleExecutable(path, msg)
-	}
-}
-
-func handleExecutable(path, msg string) {
-	for dir := range strings.SplitSeq(path, ":") {
-		fullPath := filepath.Join(dir, msg)
-		f, err := os.Stat(fullPath)
-		if err != nil {
-			continue
-		}
-
-		if f.Mode().Perm()&0111 != 0 {
-			fmt.Fprintf(os.Stdout, "%s is %s\n", msg, fullPath)
-			return
-		} else {
-			continue
-		}
-	}
-
-	fmt.Fprintf(os.Stderr, "%s: not found\n", msg)
-
-}
+// func handleType(msg, path string) {
+// 	if _, ok := commands[msg]; ok {
+// 		fmt.Fprintln(os.Stdout, msg, "is a shell builtin")
+// 	} else {
+// 		handleExecutable(path, msg)
+// 	}
+// }
+//
+// func handleExecutable(path, msg string) {
+// 	for dir := range strings.SplitSeq(path, ":") {
+// 		fullPath := filepath.Join(dir, msg)
+// 		f, err := os.Stat(fullPath)
+// 		if err != nil {
+// 			continue
+// 		}
+//
+// 		if f.Mode().Perm()&0111 != 0 {
+// 			fmt.Fprintf(os.Stdout, "%s is %s\n", msg, fullPath)
+// 			return
+// 		} else {
+// 			continue
+// 		}
+// 	}
+//
+// 	fmt.Fprintf(os.Stderr, "%s: not found\n", msg)
+//
+// }
