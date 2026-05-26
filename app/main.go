@@ -46,11 +46,8 @@ func main() {
 
 		cmds := strings.Split(cmd, " ")
 
-		if err = handleExecutable(cmds[0], cmds[1:]...); err != nil {
-			continue
-		}
+		handleExecutable(cmds)
 
-		fmt.Fprintf(os.Stdout, "Program was passed %d args (including program name).\n", len(cmds))
 	}
 }
 

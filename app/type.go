@@ -36,7 +36,18 @@ func handleTypeExecutable(path, msg string) {
 
 }
 
-func handleExecutable(command string, args ...string) error {
-	cmd := exec.Command(command, args...)
-	return cmd.Run()
+func handleExecutable(cmds []string) error {
+	cmd := exec.Command(cmds[0], cmds[1:]...)
+	err := cmd.Run()
+	if err != nil {
+		return err
+	}
+
+	fmt.Fprintf(os.Stdout, "Program was passed %d args (including program name).\n", len(cmds))
+	fmt.Fprintf(os.Stdout, "Arg #0 (program name): %s\n", cmds[0])
+	for i, c := range cmds {
+		fmt.Fprintf(os.Stdout, "Arg #%d: %s\n", i+1, c)
+	}
+	fmt.Fprintln(os.Stdout, "Program signature: 1")
+	return nil
 }
