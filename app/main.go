@@ -54,10 +54,6 @@ func checkPrefix(input, cmd string) (string, bool) {
 	return strings.CutPrefix(input, cmd)
 }
 
-<<<<<<< HEAD
-=======
-//
->>>>>>> 1677bb7 (codecrafters submit [skip ci])
 // func handleType(msg, path string) {
 // 	if _, ok := commands[msg]; ok {
 // 		fmt.Fprintln(os.Stdout, msg, "is a shell builtin")
