@@ -45,7 +45,7 @@ func handleExecutable(cmds []string) error {
 
 	fmt.Fprintf(os.Stdout, "Program was passed %d args (including program name).\n", len(cmds))
 	fmt.Fprintf(os.Stdout, "Arg #0 (program name): %s\n", cmds[0])
-	for i, c := range cmds {
+	for i, c := range cmds[1:] {
 		fmt.Fprintf(os.Stdout, "Arg #%d: %s\n", i+1, c)
 	}
 	fmt.Fprintln(os.Stdout, "Program signature: 1")
