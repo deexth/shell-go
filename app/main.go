@@ -51,8 +51,6 @@ func main() {
 			fmt.Fprintf(os.Stderr, "%s: command not found\n", cmds[0])
 		}
 
-		fmt.Fprintf(os.Stderr, "%s: command not found\n", cmds)
-
 	}
 }
 
