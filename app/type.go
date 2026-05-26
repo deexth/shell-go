@@ -36,15 +36,11 @@ func handleTypeExecutable(path, msg string) {
 
 }
 
-func handleExecutable(cmds []string) {
-	if len(cmds) == 1 {
-		fmt.Fprintf(os.Stderr, "%s: command not found\n", cmds)
-		os.Exit(1)
-	}
+func handleExecutable(cmds []string) error {
 	cmd := exec.Command(cmds[0], cmds[1:]...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin
-	cmd.Run()
+	return cmd.Run()
 
 }
