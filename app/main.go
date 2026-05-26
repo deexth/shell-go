@@ -11,6 +11,7 @@ var commands = map[string]struct{}{
 	"echo": {},
 	"type": {},
 	"exit": {},
+	"pwd":  {},
 }
 
 func main() {
