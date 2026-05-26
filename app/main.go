@@ -34,10 +34,10 @@ func main() {
 		if strings.ToLower(cmd) == "pwd" {
 			cwd, err := getWD()
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "issue getting wd: %v", err)
+				fmt.Fprintf(os.Stderr, "issue getting wd: %v\n", err)
 				continue
 			}
-			fmt.Fprintf(os.Stdout, "%s", cwd)
+			fmt.Fprintf(os.Stdout, "%s\n", cwd)
 			continue
 		}
 		if strings.ToLower(cmd) == "exit" {
