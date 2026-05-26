@@ -46,7 +46,9 @@ func main() {
 
 		cmds := strings.Split(cmd, " ")
 
-		handleExecutable(cmds)
+		if err = handleExecutable(cmds); err != nil {
+			fmt.Fprintf(os.Stderr, "%s: command not found", cmds[0])
+		}
 
 	}
 }
