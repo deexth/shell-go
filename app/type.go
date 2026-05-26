@@ -36,7 +36,7 @@ func handleTypeExecutable(path, msg string) {
 
 }
 
-func handleExecutable(command string, args ...string) {
+func handleExecutable(command string, args ...string) error {
 	cmd := exec.Command(command, args...)
-	cmd.Run()
+	return cmd.Run()
 }
