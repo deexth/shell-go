@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 )
@@ -11,11 +12,11 @@ func handleType(msg, path string) {
 	if _, ok := commands[msg]; ok {
 		fmt.Fprintln(os.Stdout, msg, "is a shell builtin")
 	} else {
-		handleExecutable(path, msg)
+		handleTypeExecutable(path, msg)
 	}
 }
 
-func handleExecutable(path, msg string) {
+func handleTypeExecutable(path, msg string) {
 	for dir := range strings.SplitSeq(path, ":") {
 		fullPath := filepath.Join(dir, msg)
 		f, err := os.Stat(fullPath)
@@ -33,4 +34,9 @@ func handleExecutable(path, msg string) {
 
 	fmt.Fprintf(os.Stderr, "%s: not found\n", msg)
 
+}
+
+func handleExecutable(command string, args ...string) {
+	cmd := exec.Command(command, args...)
+	cmd.Run()
 }
