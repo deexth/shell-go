@@ -30,6 +30,15 @@ func main() {
 
 		cmd := strings.TrimSpace(command)
 
+		if strings.ToLower(cmd) == "pwd" {
+			cwd, err := getWD()
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "issue getting wd: %v", err)
+				continue
+			}
+			fmt.Fprintf(os.Stdout, "%s", cwd)
+			continue
+		}
 		if strings.ToLower(cmd) == "exit" {
 			break
 		}

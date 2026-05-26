@@ -44,3 +44,7 @@ func handleExecutable(cmds []string) error {
 	return cmd.Run()
 
 }
+
+func getWD() (string, error) {
+	return os.Getwd()
+}
