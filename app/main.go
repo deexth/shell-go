@@ -45,16 +45,22 @@ func parseInput(input string) (string, []string) {
 	var args []string
 	var currentArg strings.Builder
 	inSingleQuote := false
+	inDoubleQuote := false
 
 	for i := 0; i < len(input); i++ {
 		char := input[i]
 
-		if char == '\'' {
+		if char == '\'' && !inDoubleQuote {
 			inSingleQuote = !inSingleQuote
 			continue
 		}
 
-		if char == ' ' && !inSingleQuote {
+		if char == '"' && !inSingleQuote {
+			inDoubleQuote = !inDoubleQuote
+			continue
+		}
+
+		if char == ' ' && (!inSingleQuote || !inDoubleQuote) {
 			if currentArg.Len() > 0 {
 				args = append(args, currentArg.String())
 				currentArg.Reset()
