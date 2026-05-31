@@ -49,7 +49,12 @@ func (c *TypeCommand) Execute(args []string, s *Shell) error {
 type CdCommand struct{}
 
 func (c *CdCommand) Execute(args []string, s *Shell) error {
-	if err := os.Chdir(args[0]); err != nil {
+	path := args[0]
+
+	if args[0] == "~" {
+		path = s.Home
+	}
+	if err := os.Chdir(path); err != nil {
 		return fmt.Errorf("cd: %s: No such file or directory", args[0])
 	}
 	return nil
