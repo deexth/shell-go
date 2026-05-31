@@ -60,7 +60,7 @@ func parseInput(input string) (string, []string) {
 			continue
 		}
 
-		if char == ' ' && (!inSingleQuote || !inDoubleQuote) {
+		if char == ' ' && (!inSingleQuote && !inDoubleQuote) {
 			if currentArg.Len() > 0 {
 				args = append(args, currentArg.String())
 				currentArg.Reset()
