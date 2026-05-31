@@ -48,5 +48,8 @@ func (c *TypeCommand) Execute(args []string, s *Shell) error {
 type CdCommand struct{}
 
 func (c *CdCommand) Execute(args []string, s *Shell) error {
+	if err := os.Chdir(args[0]); err != nil {
+		return err
+	}
 	return nil
 }
