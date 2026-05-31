@@ -41,6 +41,37 @@ func main() {
 }
 
 func parseInput(input string) (string, []string) {
-	cmdArgs := strings.Fields(input)
-	return cmdArgs[0], cmdArgs[1:]
+	input = strings.TrimSpace(input)
+	var args []string
+	var currentArg strings.Builder
+	inSingleQuote := false
+
+	for i := 0; i < len(input); i++ {
+		char := input[i]
+
+		if char == '\'' {
+			inSingleQuote = !inSingleQuote
+			continue
+		}
+
+		if char == ' ' && !inSingleQuote {
+			if currentArg.Len() > 0 {
+				args = append(args, currentArg.String())
+				currentArg.Reset()
+			}
+			continue
+		}
+
+		currentArg.WriteByte(char)
+	}
+
+	if currentArg.Len() > 0 {
+		args = append(args, currentArg.String())
+	}
+
+	if len(args) == 0 {
+		return "", nil
+	}
+
+	return args[0], args[1:]
 }
