@@ -8,14 +8,6 @@ import (
 	"strings"
 )
 
-func handleType(msg, path string) {
-	if _, ok := commands[msg]; ok {
-		fmt.Fprintln(os.Stdout, msg, "is a shell builtin")
-	} else {
-		handleTypeExecutable(path, msg)
-	}
-}
-
 func handleTypeExecutable(path, msg string) {
 	for dir := range strings.SplitSeq(path, ":") {
 		fullPath := filepath.Join(dir, msg)
@@ -36,15 +28,11 @@ func handleTypeExecutable(path, msg string) {
 
 }
 
-func handleExecutable(cmds []string) error {
-	cmd := exec.Command(cmds[0], cmds[1:]...)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	cmd.Stdin = os.Stdin
+func handleExternal(cmdName string, args []string, s *Shell) error {
+	cmd := exec.Command(cmdName, args...)
+	cmd.Stdout = s.Out
+	cmd.Stderr = s.Err
+	cmd.Stdin = s.In
 	return cmd.Run()
 
-}
-
-func getWD() (string, error) {
-	return os.Getwd()
 }

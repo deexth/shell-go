@@ -3,67 +3,42 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"os"
 	"strings"
 )
 
-var commands = map[string]struct{}{
-	"echo": {},
-	"type": {},
-	"exit": {},
-	"pwd":  {},
-}
-
 func main() {
-	path, ok := os.LookupEnv("PATH")
-	if !ok {
-		fmt.Fprintln(os.Stderr, "PATH not provided")
-	}
-	reader := bufio.NewReader(os.Stdin)
+	sh := NewShell()
+	sh.Register("pwd", &PwdCommand{})
+	sh.Register("echo", &EchoCommand{})
+	sh.Register("exit", &ExitCommand{})
+	sh.Register("type", &TypeCommand{})
+	sh.Register("cd", &CdCommand{})
+
+	reader := bufio.NewReader(sh.In)
 
 	for {
-		fmt.Print("$ ")
-		command, err := reader.ReadString('\n')
+		fmt.Fprint(sh.Out, "$ ")
+		input, err := reader.ReadString('\n')
 		if err != nil {
-			fmt.Fprintln(os.Stderr, "error reading input: ", err)
-			os.Exit(1)
-		}
-
-		cmd := strings.TrimSpace(command)
-
-		if strings.ToLower(cmd) == "pwd" {
-			cwd, err := getWD()
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "issue getting wd: %v\n", err)
-				continue
-			}
-			fmt.Fprintf(os.Stdout, "%s\n", cwd)
-			continue
-		}
-		if strings.ToLower(cmd) == "exit" {
 			break
 		}
 
-		if msg, ok := checkPrefix(cmd, "echo "); ok {
-			fmt.Fprintln(os.Stdout, msg)
-			continue
+		cmdName, args := parseInput(input)
+
+		if cmd, exists := sh.Builtins[cmdName]; exists {
+			err = cmd.Execute(args, sh)
+			if err != nil {
+				fmt.Fprintln(sh.Err, err)
+			}
+
+		} else {
+			handleExternal(cmdName, args, sh)
 		}
-
-		if msg, ok := checkPrefix(cmd, "type "); ok {
-			handleType(msg, path)
-			continue
-		}
-
-		cmds := strings.Split(cmd, " ")
-
-		err = handleExecutable(cmds)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "%s: command not found\n", cmds[0])
-		}
-
 	}
+
 }
 
-func checkPrefix(input, cmd string) (string, bool) {
-	return strings.CutPrefix(input, cmd)
+func parseInput(input string) (string, []string) {
+	cmdArgs := strings.Fields(input)
+	return cmdArgs[0], cmdArgs[1:]
 }
