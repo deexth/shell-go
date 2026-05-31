@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 )
 
 type PwdCommand struct{}
@@ -19,7 +20,7 @@ func (c *PwdCommand) Execute(args []string, s *Shell) error {
 type EchoCommand struct{}
 
 func (c *EchoCommand) Execute(args []string, s *Shell) error {
-	fmt.Fprintln(s.Out, args[:])
+	fmt.Fprintln(s.Out, strings.Join(args, " "))
 	return nil
 }
 
