@@ -79,6 +79,7 @@ func parseInput(input string) (string, []string) {
 		if char == '\\' && inDoubleQuote {
 			if input[i+1] == '\\' || input[i+1] == '"' {
 				currentArg.WriteByte(input[i+1])
+				i = i + 1
 			}
 			continue
 		}
