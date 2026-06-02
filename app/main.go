@@ -68,6 +68,21 @@ func parseInput(input string) (string, []string) {
 			continue
 		}
 
+		if char == '\\' && (!inSingleQuote && !inDoubleQuote) {
+			if i+2 <= len(input) {
+				currentArg.WriteByte(input[i+1])
+				i = i + 1
+			}
+			continue
+		}
+
+		if char == '\\' && inDoubleQuote {
+			if input[i+1] == '\\' || input[i+1] == '"' {
+				currentArg.WriteByte(input[i+1])
+			}
+			continue
+		}
+
 		currentArg.WriteByte(char)
 	}
 
