@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -28,11 +29,16 @@ func handleTypeExecutable(path, msg string) {
 
 }
 
-func handleExternal(cmdName string, args []string, s *Shell) error {
+func handleExternal(cmdName string, args []string, s *Shell) {
 	cmd := exec.Command(cmdName, args...)
 	cmd.Stdout = s.Out
 	cmd.Stderr = s.Err
 	cmd.Stdin = s.In
-	return cmd.Run()
+	err := cmd.Run()
+	if err != nil {
+		if errors.Is(err, exec.ErrNotFound) {
+			fmt.Fprintf(s.Err, "%s: command not found\n", cmdName)
+		}
+	}
 
 }

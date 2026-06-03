@@ -59,10 +59,6 @@ func main() {
 			}
 
 		} else {
-			// if err = handleExternal(cmdName, args, sh); err != nil {
-			// 	fmt.Fprintf(sh.Err, "%s: command not found\n", cmdName)
-			// }
-			//
 			handleExternal(cmdName, args, sh)
 		}
 
