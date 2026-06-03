@@ -3,7 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"strings"
+	"os"
 )
 
 func main() {
@@ -25,6 +25,33 @@ func main() {
 
 		cmdName, args := parseInput(input)
 
+		args, filename, isStderr, isAppend := parseRedirection(args)
+
+		origOut := sh.Out
+		origErr := sh.Err
+
+		var file *os.File
+		if filename != "" {
+			flags := os.O_CREATE | os.O_WRONLY
+			if isAppend {
+				flags |= os.O_APPEND
+			} else {
+				flags |= os.O_TRUNC
+			}
+
+			file, err = os.OpenFile(filename, flags, 0644)
+			if err != nil {
+				fmt.Fprintln(sh.Err, err)
+				continue
+			}
+
+			if isStderr {
+				sh.Err = file
+			} else {
+				sh.Out = file
+			}
+		}
+
 		if cmd, exists := sh.Builtins[cmdName]; exists {
 			err = cmd.Execute(args, sh)
 			if err != nil {
@@ -36,64 +63,13 @@ func main() {
 				fmt.Fprintf(sh.Err, "%s: command not found\n", cmdName)
 			}
 		}
+
+		if file != nil {
+			file.Close()
+		}
+
+		sh.Out = origOut
+		sh.Err = origErr
 	}
 
-}
-
-func parseInput(input string) (string, []string) {
-	input = strings.TrimSpace(input)
-	var args []string
-	var currentArg strings.Builder
-	inSingleQuote := false
-	inDoubleQuote := false
-
-	for i := 0; i < len(input); i++ {
-		char := input[i]
-
-		if char == '\'' && !inDoubleQuote {
-			inSingleQuote = !inSingleQuote
-			continue
-		}
-
-		if char == '"' && !inSingleQuote {
-			inDoubleQuote = !inDoubleQuote
-			continue
-		}
-
-		if char == ' ' && (!inSingleQuote && !inDoubleQuote) {
-			if currentArg.Len() > 0 {
-				args = append(args, currentArg.String())
-				currentArg.Reset()
-			}
-			continue
-		}
-
-		if char == '\\' && (!inSingleQuote && !inDoubleQuote) {
-			if i+2 <= len(input) {
-				currentArg.WriteByte(input[i+1])
-				i = i + 1
-			}
-			continue
-		}
-
-		if char == '\\' && inDoubleQuote {
-			if input[i+1] == '\\' || input[i+1] == '"' {
-				currentArg.WriteByte(input[i+1])
-				i = i + 1
-			}
-			continue
-		}
-
-		currentArg.WriteByte(char)
-	}
-
-	if currentArg.Len() > 0 {
-		args = append(args, currentArg.String())
-	}
-
-	if len(args) == 0 {
-		return "", nil
-	}
-
-	return args[0], args[1:]
 }
