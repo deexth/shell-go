@@ -64,19 +64,20 @@ func parseInput(input string) (string, []string) {
 	return args[0], args[1:]
 }
 
-func parseRedirection(args []string) (cleanedArgs []string, filename string, isStderr, isAppend bool) {
+func parseRedirection(args []string) (cleanedArgs []string, filename string, isStderr, isAppendErr, isAppend bool) {
 	for i := range args {
 		sep := args[i]
 		if i+1 < len(args) {
 			if sep == "1>" || sep == ">" || sep == "2>" || sep == "2>>" || sep == ">>" || sep == "1>>" {
 				filename = args[i+1]
 				cleanedArgs = append(cleanedArgs, args[:i]...)
-				isAppend = (sep == "2>>" || sep == "1>>" || sep == ">>")
+				isAppend = (sep == "1>>" || sep == ">>")
 				isStderr = sep == "2>"
+				isAppendErr = sep == "2>>"
 
-				return cleanedArgs, filename, isStderr, isAppend
+				return cleanedArgs, filename, isStderr, isAppendErr, isAppend
 			}
 		}
 	}
-	return args, "", false, false
+	return args, "", false, false, false
 }

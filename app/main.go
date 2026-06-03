@@ -25,7 +25,7 @@ func main() {
 
 		cmdName, args := parseInput(input)
 
-		args, filename, isStderr, isAppend := parseRedirection(args)
+		args, filename, isStderr, isAppendErr, isAppend := parseRedirection(args)
 
 		origOut := sh.Out
 		origErr := sh.Err
@@ -33,7 +33,7 @@ func main() {
 		var file *os.File
 		if filename != "" {
 			flags := os.O_CREATE | os.O_WRONLY
-			if isAppend {
+			if isAppend || isAppendErr {
 				flags |= os.O_APPEND
 			} else {
 				flags |= os.O_TRUNC
@@ -45,7 +45,7 @@ func main() {
 				continue
 			}
 
-			if isStderr {
+			if isStderr || isAppendErr {
 				sh.Err = file
 			} else {
 				sh.Out = file
