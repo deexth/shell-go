@@ -3,6 +3,8 @@ package main
 import (
 	"io"
 	"os"
+
+	"github.com/chzyer/readline"
 )
 
 type Shell struct {
@@ -29,4 +31,14 @@ func NewShell() *Shell {
 
 func (s *Shell) Register(name string, cmd Command) {
 	s.Builtins[name] = cmd
+}
+
+func (s *Shell) BuildCompleter() *readline.PrefixCompleter {
+	cmds := make([]readline.PrefixCompleterInterface, 0)
+
+	for builtin := range s.Builtins {
+		cmds = append(cmds, readline.PcItem(builtin))
+	}
+
+	return readline.NewPrefixCompleter(cmds...)
 }

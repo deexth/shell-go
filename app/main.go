@@ -1,9 +1,10 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"os"
+
+	"github.com/chzyer/readline"
 )
 
 func main() {
@@ -14,11 +15,26 @@ func main() {
 	sh.Register("type", &TypeCommand{})
 	sh.Register("cd", &CdCommand{})
 
-	reader := bufio.NewReader(sh.In)
+	completer := sh.BuildCompleter()
+
+	cfg := &readline.Config{
+		Prompt:       "$ ",
+		AutoComplete: completer,
+	}
+
+	l, err := readline.NewEx(cfg)
+	if err != nil {
+		fmt.Fprintln(sh.Err, err)
+	}
+	defer l.Close()
+	l.CaptureExitSignal()
+
+	// reader := bufio.NewReader(sh.In)
 
 	for {
-		fmt.Fprint(sh.Out, "$ ")
-		input, err := reader.ReadString('\n')
+		// fmt.Fprint(sh.Out, "$ ")
+		// input, err := reader.ReadString('\n')
+		input, err := l.Readline()
 		if err != nil {
 			break
 		}
