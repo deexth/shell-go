@@ -3,8 +3,7 @@ package main
 import (
 	"io"
 	"os"
-
-	"github.com/chzyer/readline"
+	"strings"
 )
 
 type Shell struct {
@@ -14,6 +13,10 @@ type Shell struct {
 	EnvPath  string
 	Home     string
 	Builtins map[string]Command
+}
+
+type ShellCompleter struct {
+	*Shell
 }
 
 func NewShell() *Shell {
@@ -33,12 +36,37 @@ func (s *Shell) Register(name string, cmd Command) {
 	s.Builtins[name] = cmd
 }
 
-func (s *Shell) BuildCompleter() *readline.PrefixCompleter {
-	cmds := make([]readline.PrefixCompleterInterface, 0)
+func NewShellCompleter(s *Shell) *ShellCompleter {
+	return &ShellCompleter{
+		Shell: s,
+	}
+}
 
-	for builtin := range s.Builtins {
-		cmds = append(cmds, readline.PcItem(builtin))
+func (s *ShellCompleter) Do(line []rune, pos int) ([][]rune, int) {
+	prefix := string(line[:pos])
+
+	var matches [][]rune
+
+	for cmd := range s.Builtins {
+		suffix, ok := strings.CutPrefix(cmd, prefix)
+		if ok {
+			matches = append(matches, []rune(suffix))
+		}
 	}
 
-	return readline.NewPrefixCompleter(cmds...)
+	if len(matches) == 0 {
+		s.Out.Write([]byte{'\x07'})
+	}
+
+	return matches, 0
 }
+
+// func (s *Shell) BuildCompleter() *readline.PrefixCompleter {
+// 	cmds := make([]readline.PrefixCompleterInterface, 0)
+//
+// 	for builtin := range s.Builtins {
+// 		cmds = append(cmds, readline.PcItem(builtin))
+// 	}
+//
+// 	return readline.NewPrefixCompleter(cmds...)
+// }

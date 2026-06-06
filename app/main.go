@@ -15,7 +15,7 @@ func main() {
 	sh.Register("type", &TypeCommand{})
 	sh.Register("cd", &CdCommand{})
 
-	completer := sh.BuildCompleter()
+	completer := NewShellCompleter(sh)
 
 	cfg := &readline.Config{
 		Prompt:       "$ ",
