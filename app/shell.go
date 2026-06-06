@@ -56,6 +56,7 @@ func (s *ShellCompleter) Do(line []rune, pos int) ([][]rune, int) {
 
 	if len(matches) == 0 {
 		s.Out.Write([]byte{'\x07'})
+		// fmt.Fprint(s.Out, "\x07")
 	}
 
 	return matches, 0
