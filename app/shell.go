@@ -53,6 +53,7 @@ func (s *ShellCompleter) Do(line []rune, pos int) ([][]rune, int) {
 			if len(prefix) == len(cmd) {
 				matches = append(matches, []rune{' '})
 			} else {
+				suffix += " "
 				matches = append(matches, []rune(suffix))
 			}
 		}
