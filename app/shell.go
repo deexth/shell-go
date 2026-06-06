@@ -50,7 +50,11 @@ func (s *ShellCompleter) Do(line []rune, pos int) ([][]rune, int) {
 	for cmd := range s.Builtins {
 		suffix, ok := strings.CutPrefix(cmd, prefix)
 		if ok {
-			matches = append(matches, []rune(suffix))
+			if len(prefix) == len(cmd) {
+				matches = append(matches, []rune{' '})
+			} else {
+				matches = append(matches, []rune(suffix))
+			}
 		}
 	}
 
