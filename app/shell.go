@@ -49,16 +49,6 @@ func (s *ShellCompleter) Do(line []rune, pos int) ([][]rune, int) {
 
 	var matches [][]rune
 
-	if strings.ContainsRune(prefix, ' ') {
-		for p := range strings.SplitSeq(s.EnvPath, ":") {
-			if strings.HasPrefix(p, prefix) {
-				suffix := p[len(prefix):]
-				matches = append(matches, []rune(suffix+" "))
-			}
-		}
-		return matches, len(prefix)
-	}
-
 	for cmd := range s.Builtins {
 		if strings.HasPrefix(cmd, prefix) {
 			suffix := cmd[len(prefix):]
@@ -83,20 +73,32 @@ func (s *ShellCompleter) Do(line []rune, pos int) ([][]rune, int) {
 
 func getPossileExecutables(path string) []string {
 	possibleExecutable := make([]string, 0)
+
 	for p := range strings.SplitSeq(path, ":") {
 		files, err := os.ReadDir(p)
 		if err != nil {
 			continue
 		}
 
+		seen := make(map[string]bool, 0)
 		for _, file := range files {
+			if file.IsDir() {
+				continue
+			}
+
+			name := file.Name()
+			if seen[name] {
+				continue
+			}
+
 			f, err := file.Info()
 			if err != nil {
 				continue
 			}
 
 			if f.Mode().Perm()&0111 != 0 {
-				possibleExecutable = append(possibleExecutable, f.Name())
+				possibleExecutable = append(possibleExecutable, name)
+				seen[name] = true
 			}
 
 		}
