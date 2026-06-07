@@ -22,19 +22,20 @@ func main() {
 		AutoComplete: completer,
 	}
 
-	l, err := readline.NewEx(cfg)
+	reader, err := readline.NewEx(cfg)
 	if err != nil {
 		fmt.Fprintln(sh.Err, err)
+		os.Exit(1)
 	}
-	defer l.Close()
-	l.CaptureExitSignal()
+	defer reader.Close()
+	reader.CaptureExitSignal()
 
 	// reader := bufio.NewReader(sh.In)
 
 	for {
 		// fmt.Fprint(sh.Out, "$ ")
 		// input, err := reader.ReadString('\n')
-		input, err := l.Readline()
+		input, err := reader.Readline()
 		if err != nil {
 			break
 		}
