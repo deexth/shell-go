@@ -53,14 +53,15 @@ func (s *ShellCompleter) Do(line []rune, pos int) ([][]rune, int) {
 
 	for cmd := range s.Builtins {
 		if strings.HasPrefix(cmd, prefix) {
-			matches = append(matches, []rune(cmd+""))
+			suffix := cmd[len(prefix):]
+			matches = append(matches, []rune(suffix+" "))
 		}
 	}
 
-	// if len(matches) == 0 {
-	// 	s.Out.Write([]byte{'\x07'})
-	// 	// fmt.Fprint(s.Out, "\x07")
-	// }
+	if len(matches) == 0 {
+		s.Out.Write([]byte{'\x07'})
+		// fmt.Fprint(s.Out, "\x07")
+	}
 
 	return matches, len(prefix)
 }
