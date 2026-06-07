@@ -7,12 +7,13 @@ import (
 )
 
 type Shell struct {
-	In       io.Reader
-	Out      io.Writer
-	Err      io.Writer
-	EnvPath  string
-	Home     string
-	Builtins map[string]Command
+	In                io.Reader
+	Out               io.Writer
+	Err               io.Writer
+	EnvPath           string
+	Home              string
+	Builtins          map[string]Command
+	CustomExecutables []string
 }
 
 type ShellCompleter struct {
@@ -23,12 +24,13 @@ func NewShell() *Shell {
 	path, _ := os.LookupEnv("PATH")
 	home, _ := os.LookupEnv("HOME")
 	return &Shell{
-		In:       os.Stdin,
-		Out:      os.Stdout,
-		Err:      os.Stderr,
-		EnvPath:  path,
-		Home:     home,
-		Builtins: make(map[string]Command),
+		In:                os.Stdin,
+		Out:               os.Stdout,
+		Err:               os.Stderr,
+		EnvPath:           path,
+		Home:              home,
+		Builtins:          make(map[string]Command),
+		CustomExecutables: getPossileExecutables(path),
 	}
 }
 
@@ -61,8 +63,12 @@ func (s *ShellCompleter) Do(line []rune, pos int) ([][]rune, int) {
 		if strings.HasPrefix(cmd, prefix) {
 			suffix := cmd[len(prefix):]
 			matches = append(matches, []rune(suffix+" "))
-		} else if strings.HasPrefix(s.EnvPath, prefix) {
-			suffix := s.EnvPath[len(prefix):]
+		}
+	}
+
+	for _, cmd := range s.CustomExecutables {
+		if strings.HasPrefix(cmd, prefix) {
+			suffix := cmd[len(prefix):]
 			matches = append(matches, []rune(suffix+" "))
 		}
 	}
@@ -73,6 +79,31 @@ func (s *ShellCompleter) Do(line []rune, pos int) ([][]rune, int) {
 	}
 
 	return matches, len(prefix)
+}
+
+func getPossileExecutables(path string) []string {
+	possibleExecutable := make([]string, 0)
+	for p := range strings.SplitSeq(path, ":") {
+		files, err := os.ReadDir(p)
+		if err != nil {
+			continue
+		}
+
+		for _, file := range files {
+			f, err := file.Info()
+			if err != nil {
+				continue
+			}
+
+			if f.Mode().Perm()&0111 != 0 {
+				possibleExecutable = append(possibleExecutable, f.Name())
+			}
+
+		}
+
+	}
+
+	return possibleExecutable
 }
 
 // func (s *Shell) BuildCompleter() *readline.PrefixCompleter {
