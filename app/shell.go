@@ -45,12 +45,19 @@ func NewShellCompleter(s *Shell) *ShellCompleter {
 func (s *ShellCompleter) Do(line []rune, pos int) ([][]rune, int) {
 	prefix := string(line[:pos])
 
+	fields := strings.Fields(prefix)
+	current := ""
+
+	if len(fields) > 0 {
+		current = fields[len(fields)-1]
+	}
+
 	var matches [][]rune
 
 	for cmd := range s.Builtins {
-		suffix, ok := strings.CutPrefix(cmd, prefix)
+		suffix, ok := strings.CutPrefix(cmd, current)
 		if ok {
-			if len(prefix) == len(cmd) {
+			if len(current) == len(cmd) {
 				matches = append(matches, []rune{' '})
 			} else {
 				suffix += " "
