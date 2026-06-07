@@ -61,6 +61,9 @@ func (s *ShellCompleter) Do(line []rune, pos int) ([][]rune, int) {
 		if strings.HasPrefix(cmd, prefix) {
 			suffix := cmd[len(prefix):]
 			matches = append(matches, []rune(suffix+" "))
+		} else if strings.HasPrefix(s.EnvPath, prefix) {
+			suffix := s.EnvPath[len(prefix):]
+			matches = append(matches, []rune(suffix+" "))
 		}
 	}
 
