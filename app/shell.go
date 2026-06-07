@@ -56,6 +56,10 @@ func (s *ShellCompleter) Do(line []rune, pos int) ([][]rune, int) {
 		}
 	}
 
+	if len(matches) == 0 {
+		s.Out.Write([]byte{'\x07'})
+	}
+
 	for _, cmd := range s.CustomExecutables {
 		if strings.HasPrefix(cmd, prefix) {
 			suffix := cmd[len(prefix):]
@@ -65,7 +69,6 @@ func (s *ShellCompleter) Do(line []rune, pos int) ([][]rune, int) {
 
 	if len(matches) == 0 {
 		s.Out.Write([]byte{'\x07'})
-		// fmt.Fprint(s.Out, "\x07")
 	}
 
 	return matches, len(prefix)

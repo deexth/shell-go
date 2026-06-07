@@ -30,11 +30,7 @@ func main() {
 	defer reader.Close()
 	reader.CaptureExitSignal()
 
-	// reader := bufio.NewReader(sh.In)
-
 	for {
-		// fmt.Fprint(sh.Out, "$ ")
-		// input, err := reader.ReadString('\n')
 		input, err := reader.Readline()
 		if err != nil {
 			break
