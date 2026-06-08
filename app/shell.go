@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"slices"
+	"sort"
 	"strings"
 
 	"github.com/chzyer/readline"
@@ -54,51 +54,56 @@ func NewShellCompleter(s *Shell) *ShellCompleter {
 func (s *ShellCompleter) Do(line []rune, pos int) ([][]rune, int) {
 	prefix := string(line[:pos])
 
+	// Guard: Only autocomplete if the user is typing the command name
 	fields := strings.Fields(prefix)
-
-	if len(prefix) > 1 || strings.HasPrefix(prefix, " ") || strings.TrimSpace(prefix) == "" {
+	if len(fields) > 1 || strings.HasSuffix(prefix, " ") || strings.TrimSpace(prefix) == "" {
 		return nil, 0
 	}
 
 	current := fields[0]
-	seen := make(map[string]bool, 0)
-	var matches []string
+	var matchNames []string
+	seen := make(map[string]bool)
 
+	// Gather matching builtins
 	for cmd := range s.Builtins {
 		if strings.HasPrefix(cmd, current) {
-			suffix := cmd[len(current):]
 			if !seen[cmd] {
+				suffix := cmd[len(current):]
 				seen[cmd] = true
-				matches = append(matches, suffix)
+				matchNames = append(matchNames, suffix)
 			}
 		}
-
 	}
 
+	// Gather matching custom executables
 	for _, cmd := range s.CustomExecutables {
 		if strings.HasPrefix(cmd, current) {
-			suffix := cmd[len(current):]
 			if !seen[cmd] {
+				suffix := cmd[len(current):]
 				seen[cmd] = true
-				matches = append(matches, suffix)
+				matchNames = append(matchNames, suffix)
 			}
 		}
 	}
 
-	if len(matches) == 0 {
-		s.Out.Write([]byte{'\x07'})
+	// Case 0: No matches found
+	if len(matchNames) == 0 {
+		s.Out.Write([]byte{'\x07'}) // Ring bell
 		return nil, 0
 	}
 
-	slices.Sort(matches)
+	// Sort matching items alphabetically
+	sort.Strings(matchNames)
 
-	if len(matches) == 1 {
+	// Case 1: Single match -> Autocomplete immediately
+	if len(matchNames) == 1 {
 		s.LastLine = ""
 		s.TabCount = 0
-		choice := matches[0] + " "
+		choice := matchNames[0] + " "
 		return [][]rune{[]rune(choice)}, len(current)
 	}
 
+	// Case 2: Multiple matches -> Manage 1st vs 2nd TAB press
 	state := string(line[:pos])
 	if state == s.LastLine {
 		s.TabCount++
@@ -108,20 +113,22 @@ func (s *ShellCompleter) Do(line []rune, pos int) ([][]rune, int) {
 	}
 
 	if s.TabCount == 1 {
+		// First TAB press: Ring the bell and suppress default menu behavior
 		s.Out.Write([]byte{'\x07'})
 		return nil, 0
 	}
 
+	// Second TAB press: Print options on a new line
 	fmt.Fprint(s.Out, "\n")
-	fmt.Fprintln(s.Out, strings.Join(matches, " "))
+	fmt.Fprintln(s.Out, strings.Join(matchNames, "  ")) // Separated by two spaces
 
+	// Redraw the prompt and re-populate the original prefix on the new line
 	if s.RlInstance != nil {
 		s.RlInstance.Refresh()
 	}
 
 	return nil, 0
 }
-
 func getPossileExecutables(path string) []string {
 	possibleExecutable := make([]string, 0)
 
