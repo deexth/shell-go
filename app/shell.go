@@ -99,7 +99,7 @@ func (s *ShellCompleter) Do(line []rune, pos int) ([][]rune, int) {
 		return [][]rune{[]rune(choice)}, len(current)
 	}
 
-	state := prefix
+	state := string(line[:pos])
 	if state == s.LastLine {
 		s.TabCount++
 	} else {
