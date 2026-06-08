@@ -56,7 +56,7 @@ func (s *ShellCompleter) Do(line []rune, pos int) ([][]rune, int) {
 
 	fields := strings.Fields(prefix)
 
-	if len(prefix) > 1 || strings.HasPrefix(prefix, " ") || strings.TrimSpace(prefix) == "" {
+	if len(fields) > 1 || strings.HasPrefix(prefix, " ") || strings.TrimSpace(prefix) == "" {
 		return nil, 0
 	}
 
