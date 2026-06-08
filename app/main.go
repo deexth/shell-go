@@ -36,6 +36,11 @@ func main() {
 			break
 		}
 
+		if completer.SndTab {
+			fmt.Fprintln(sh.Out, input)
+
+		}
+
 		cmdName, args := parseInput(input)
 
 		args, filename, isStderr, isAppendErr, isAppend := parseRedirection(args)
