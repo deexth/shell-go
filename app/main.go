@@ -30,6 +30,8 @@ func main() {
 	defer reader.Close()
 	reader.CaptureExitSignal()
 
+	completer.RlInstance = reader
+
 	for {
 		input, err := reader.Readline()
 		if err != nil {

@@ -6,6 +6,8 @@ import (
 	"os"
 	"sort"
 	"strings"
+
+	"github.com/chzyer/readline"
 )
 
 type Shell struct {
@@ -20,6 +22,9 @@ type Shell struct {
 
 type ShellCompleter struct {
 	*Shell
+	RlInstance *readline.Instance
+	LastLine   string
+	TabCount   int
 }
 
 func NewShell() *Shell {
@@ -48,64 +53,69 @@ func NewShellCompleter(s *Shell) *ShellCompleter {
 
 func (s *ShellCompleter) Do(line []rune, pos int) ([][]rune, int) {
 	prefix := string(line[:pos])
-	sndTab := false
 
-	// fmt.Fprintf(
-	// 	os.Stderr,
-	// 	"\nTAB: %q pos=%d\n",
-	// 	string(line),
-	// 	pos,
-	// )
-
-	if prefix == " " || prefix == "" {
+	fields := strings.Fields(prefix)
+	if len(fields) > 1 || strings.HasSuffix(prefix, " ") || strings.TrimSpace(prefix) == "" {
 		return nil, 0
 	}
-	seen := make(map[string]bool, 0)
-	var matches [][]rune
+
+	current := fields[0]
+	var matchNames []string
+	seen := make(map[string]bool)
 
 	for cmd := range s.Builtins {
-		if strings.HasPrefix(cmd, prefix) {
-			suffix := cmd[len(prefix):]
-			if seen[suffix] {
-				continue
+		if strings.HasPrefix(cmd, current) {
+			if !seen[cmd] {
+				seen[cmd] = true
+				matchNames = append(matchNames, cmd)
 			}
-			matches = append(matches, []rune(suffix+" "))
-			seen[suffix] = true
 		}
-
-	}
-
-	if len(matches) == 0 {
-		s.Out.Write([]byte{'\x07'})
 	}
 
 	for _, cmd := range s.CustomExecutables {
-		if strings.HasPrefix(cmd, prefix) {
-			suffix := cmd[len(prefix):]
-			if seen[suffix] {
-				continue
+		if strings.HasPrefix(cmd, current) {
+			if !seen[cmd] {
+				seen[cmd] = true
+				matchNames = append(matchNames, cmd)
 			}
-			matches = append(matches, []rune(suffix+" "))
-			seen[suffix] = true
 		}
-		sndTab = true
 	}
 
-	if sndTab {
-		fmt.Fprintln(s.Out, "")
-	}
-
-	if len(matches) == 0 {
+	if len(matchNames) == 0 {
 		s.Out.Write([]byte{'\x07'})
+		return nil, 0
 	}
 
-	sort.Slice(matches, func(i, j int) bool {
-		return string(matches[i]) < string(matches[j])
-	})
+	sort.Strings(matchNames)
 
-	return matches, len(prefix)
+	if len(matchNames) == 1 {
+		s.LastLine = ""
+		s.TabCount = 0
+		choice := matchNames[0] + " "
+		return [][]rune{[]rune(choice)}, len(current)
+	}
+
+	state := string(line[:pos])
+	if state == s.LastLine {
+		s.TabCount++
+	} else {
+		s.LastLine = state
+		s.TabCount = 1
+	}
+
+	if s.TabCount == 1 {
+		s.Out.Write([]byte{'\x07'})
+		return nil, 0
+	}
+
+	fmt.Fprint(s.Out, "\n")
+	fmt.Fprintln(s.Out, strings.Join(matchNames, "  "))
+	if s.RlInstance != nil {
+		s.RlInstance.Refresh()
+	}
+
+	return nil, 0
 }
-
 func getPossileExecutables(path string) []string {
 	possibleExecutable := make([]string, 0)
 
