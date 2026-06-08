@@ -67,7 +67,7 @@ func (s *ShellCompleter) Do(line []rune, pos int) ([][]rune, int) {
 	for cmd := range s.Builtins {
 		if strings.HasPrefix(cmd, current) {
 			suffix := cmd[len(current):]
-			if !seen[suffix] {
+			if !seen[cmd] {
 				seen[cmd] = true
 				matches = append(matches, suffix)
 			}
@@ -78,7 +78,7 @@ func (s *ShellCompleter) Do(line []rune, pos int) ([][]rune, int) {
 	for _, cmd := range s.CustomExecutables {
 		if strings.HasPrefix(cmd, current) {
 			suffix := cmd[len(current):]
-			if !seen[suffix] {
+			if !seen[cmd] {
 				seen[cmd] = true
 				matches = append(matches, suffix)
 			}
