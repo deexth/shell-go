@@ -98,6 +98,14 @@ func (s *ShellCompleter) Do(line []rune, pos int) ([][]rune, int) {
 		return [][]rune{[]rune(choice)}, len(current)
 	}
 
+	lcp := longestCommonPrefix(matches)
+	if len(lcp) > len(current) {
+		s.LastLine = ""
+		s.TabCount = 0
+		suffix := lcp[len(current):] // Extract only the un-typed portion of the prefix
+		return [][]rune{[]rune(suffix)}, len(current)
+	}
+
 	state := string(line[:pos])
 	if state == s.LastLine {
 		s.TabCount++
@@ -119,6 +127,22 @@ func (s *ShellCompleter) Do(line []rune, pos int) ([][]rune, int) {
 	}
 
 	return nil, 0
+}
+
+func longestCommonPrefix(strs []string) string {
+	if len(strs) == 0 {
+		return ""
+	}
+	prefix := strs[0]
+	for i := 1; i < len(strs); i++ {
+		for !strings.HasPrefix(strs[i], prefix) {
+			if len(prefix) == 0 {
+				return ""
+			}
+			prefix = prefix[:len(prefix)-1]
+		}
+	}
+	return prefix
 }
 
 func getPossileExecutables(path string) []string {
