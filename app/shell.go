@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"os"
 	"sort"
@@ -19,7 +20,6 @@ type Shell struct {
 
 type ShellCompleter struct {
 	*Shell
-	SndTab bool
 }
 
 func NewShell() *Shell {
@@ -42,20 +42,35 @@ func (s *Shell) Register(name string, cmd Command) {
 
 func NewShellCompleter(s *Shell) *ShellCompleter {
 	return &ShellCompleter{
-		Shell:  s,
-		SndTab: false,
+		Shell: s,
 	}
 }
 
 func (s *ShellCompleter) Do(line []rune, pos int) ([][]rune, int) {
 	prefix := string(line[:pos])
+	sndTab := false
 
+	// fmt.Fprintf(
+	// 	os.Stderr,
+	// 	"\nTAB: %q pos=%d\n",
+	// 	string(line),
+	// 	pos,
+	// )
+
+	if prefix == " " || prefix == "" {
+		return nil, 0
+	}
+	seen := make(map[string]bool, 0)
 	var matches [][]rune
 
 	for cmd := range s.Builtins {
 		if strings.HasPrefix(cmd, prefix) {
 			suffix := cmd[len(prefix):]
+			if seen[suffix] {
+				continue
+			}
 			matches = append(matches, []rune(suffix+" "))
+			seen[suffix] = true
 		}
 
 	}
@@ -67,9 +82,17 @@ func (s *ShellCompleter) Do(line []rune, pos int) ([][]rune, int) {
 	for _, cmd := range s.CustomExecutables {
 		if strings.HasPrefix(cmd, prefix) {
 			suffix := cmd[len(prefix):]
+			if seen[suffix] {
+				continue
+			}
 			matches = append(matches, []rune(suffix+" "))
+			seen[suffix] = true
 		}
-		s.SndTab = true
+		sndTab = true
+	}
+
+	if sndTab {
+		fmt.Fprintln(s.Out, "")
 	}
 
 	if len(matches) == 0 {
