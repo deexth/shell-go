@@ -93,7 +93,8 @@ func (s *ShellCompleter) Do(line []rune, pos int) ([][]rune, int) {
 	if len(matches) == 1 {
 		s.LastLine = ""
 		s.TabCount = 0
-		choice := matches[0] + " "
+		suffix := strings.TrimPrefix(matches[0], current)
+		choice := suffix + " "
 		return [][]rune{[]rune(choice)}, len(current)
 	}
 
