@@ -71,6 +71,8 @@ func (s *ShellCompleter) Do(line []rune, pos int) ([][]rune, int) {
 		s.Out.Write([]byte{'\x07'})
 	}
 
+	matches = sortMatches(matches)
+
 	return matches, len(prefix)
 }
 
@@ -109,6 +111,19 @@ func getPossileExecutables(path string) []string {
 	}
 
 	return possibleExecutable
+}
+
+func sortMatches(matches [][]rune) [][]rune {
+	for i := 1; i < len(matches); i++ {
+		for j := i; j > 0; j-- {
+			if string(matches[j-1]) < string(matches[j]) {
+				continue
+			}
+
+			matches[j-1], matches[j] = matches[j], matches[j-1]
+		}
+	}
+	return matches
 }
 
 // func (s *Shell) BuildCompleter() *readline.PrefixCompleter {
