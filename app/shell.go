@@ -54,56 +54,49 @@ func NewShellCompleter(s *Shell) *ShellCompleter {
 func (s *ShellCompleter) Do(line []rune, pos int) ([][]rune, int) {
 	prefix := string(line[:pos])
 
-	// Guard: Only autocomplete if the user is typing the command name
 	fields := strings.Fields(prefix)
-	if len(fields) > 1 || strings.HasSuffix(prefix, " ") || strings.TrimSpace(prefix) == "" {
+
+	if len(prefix) > 1 || strings.HasPrefix(prefix, " ") || strings.TrimSpace(prefix) == "" {
 		return nil, 0
 	}
 
 	current := fields[0]
-	var matchNames []string
-	seen := make(map[string]bool)
+	seen := make(map[string]bool, 0)
+	var matches []string
 
-	// Gather matching builtins
 	for cmd := range s.Builtins {
 		if strings.HasPrefix(cmd, current) {
 			if !seen[cmd] {
-				suffix := cmd[len(current):]
 				seen[cmd] = true
-				matchNames = append(matchNames, suffix)
+				matches = append(matches, cmd)
 			}
 		}
+
 	}
 
-	// Gather matching custom executables
 	for _, cmd := range s.CustomExecutables {
 		if strings.HasPrefix(cmd, current) {
 			if !seen[cmd] {
-				suffix := cmd[len(current):]
 				seen[cmd] = true
-				matchNames = append(matchNames, suffix)
+				matches = append(matches, cmd)
 			}
 		}
 	}
 
-	// Case 0: No matches found
-	if len(matchNames) == 0 {
-		s.Out.Write([]byte{'\x07'}) // Ring bell
+	if len(matches) == 0 {
+		s.Out.Write([]byte{'\x07'})
 		return nil, 0
 	}
 
-	// Sort matching items alphabetically
-	sort.Strings(matchNames)
+	sort.Strings(matches)
 
-	// Case 1: Single match -> Autocomplete immediately
-	if len(matchNames) == 1 {
+	if len(matches) == 1 {
 		s.LastLine = ""
 		s.TabCount = 0
-		choice := matchNames[0] + " "
+		choice := matches[0] + " "
 		return [][]rune{[]rune(choice)}, len(current)
 	}
 
-	// Case 2: Multiple matches -> Manage 1st vs 2nd TAB press
 	state := string(line[:pos])
 	if state == s.LastLine {
 		s.TabCount++
@@ -113,22 +106,20 @@ func (s *ShellCompleter) Do(line []rune, pos int) ([][]rune, int) {
 	}
 
 	if s.TabCount == 1 {
-		// First TAB press: Ring the bell and suppress default menu behavior
 		s.Out.Write([]byte{'\x07'})
 		return nil, 0
 	}
 
-	// Second TAB press: Print options on a new line
 	fmt.Fprint(s.Out, "\n")
-	fmt.Fprintln(s.Out, strings.Join(matchNames, "  ")) // Separated by two spaces
+	fmt.Fprintln(s.Out, strings.Join(matches, " "))
 
-	// Redraw the prompt and re-populate the original prefix on the new line
 	if s.RlInstance != nil {
 		s.RlInstance.Refresh()
 	}
 
 	return nil, 0
 }
+
 func getPossileExecutables(path string) []string {
 	possibleExecutable := make([]string, 0)
 
