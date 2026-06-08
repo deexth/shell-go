@@ -19,6 +19,7 @@ type Shell struct {
 
 type ShellCompleter struct {
 	*Shell
+	SndTab bool
 }
 
 func NewShell() *Shell {
@@ -41,7 +42,8 @@ func (s *Shell) Register(name string, cmd Command) {
 
 func NewShellCompleter(s *Shell) *ShellCompleter {
 	return &ShellCompleter{
-		Shell: s,
+		Shell:  s,
+		SndTab: false,
 	}
 }
 
@@ -55,6 +57,7 @@ func (s *ShellCompleter) Do(line []rune, pos int) ([][]rune, int) {
 			suffix := cmd[len(prefix):]
 			matches = append(matches, []rune(suffix+" "))
 		}
+
 	}
 
 	if len(matches) == 0 {
@@ -66,6 +69,7 @@ func (s *ShellCompleter) Do(line []rune, pos int) ([][]rune, int) {
 			suffix := cmd[len(prefix):]
 			matches = append(matches, []rune(suffix+" "))
 		}
+		s.SndTab = true
 	}
 
 	if len(matches) == 0 {
