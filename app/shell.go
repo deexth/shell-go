@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"sort"
+	"slices"
 	"strings"
 
 	"github.com/chzyer/readline"
@@ -22,8 +22,8 @@ type Shell struct {
 
 type ShellCompleter struct {
 	*Shell
-	RlInstance *readline.Instance
-	LastLine   string
+	RlInstance *readline.Instance // Reference to refresh the prompt line
+	LastLine   string             // Tracks the current input text state
 	TabCount   int
 }
 
@@ -55,47 +55,51 @@ func (s *ShellCompleter) Do(line []rune, pos int) ([][]rune, int) {
 	prefix := string(line[:pos])
 
 	fields := strings.Fields(prefix)
-	if len(fields) > 1 || strings.HasSuffix(prefix, " ") || strings.TrimSpace(prefix) == "" {
+
+	if len(prefix) > 1 || strings.HasPrefix(prefix, " ") || strings.TrimSpace(prefix) == "" {
 		return nil, 0
 	}
 
 	current := fields[0]
-	var matchNames []string
-	seen := make(map[string]bool)
+	seen := make(map[string]bool, 0)
+	var matches []string
 
 	for cmd := range s.Builtins {
 		if strings.HasPrefix(cmd, current) {
-			if !seen[cmd] {
+			suffix := cmd[len(current):]
+			if !seen[suffix] {
 				seen[cmd] = true
-				matchNames = append(matchNames, cmd)
+				matches = append(matches, suffix)
 			}
 		}
+
 	}
 
 	for _, cmd := range s.CustomExecutables {
 		if strings.HasPrefix(cmd, current) {
-			if !seen[cmd] {
+			suffix := cmd[len(current):]
+			if !seen[suffix] {
 				seen[cmd] = true
-				matchNames = append(matchNames, cmd)
+				matches = append(matches, suffix)
 			}
 		}
 	}
 
-	if len(matchNames) == 0 {
+	if len(matches) == 0 {
 		s.Out.Write([]byte{'\x07'})
 		return nil, 0
 	}
 
-	sort.Strings(matchNames)
+	slices.Sort(matches)
 
-	if len(matchNames) == 1 {
+	if len(matches) == 1 {
 		s.LastLine = ""
 		s.TabCount = 0
-		choice := matchNames[0] + " "
+		choice := matches[0] + " "
 		return [][]rune{[]rune(choice)}, len(current)
 	}
 
-	state := string(line[:pos])
+	state := prefix
 	if state == s.LastLine {
 		s.TabCount++
 	} else {
@@ -109,13 +113,15 @@ func (s *ShellCompleter) Do(line []rune, pos int) ([][]rune, int) {
 	}
 
 	fmt.Fprint(s.Out, "\n")
-	fmt.Fprintln(s.Out, strings.Join(matchNames, "  "))
+	fmt.Fprintln(s.Out, strings.Join(matches, " "))
+
 	if s.RlInstance != nil {
 		s.RlInstance.Refresh()
 	}
 
 	return nil, 0
 }
+
 func getPossileExecutables(path string) []string {
 	possibleExecutable := make([]string, 0)
 
