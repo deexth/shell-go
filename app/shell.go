@@ -11,13 +11,16 @@ import (
 )
 
 type Shell struct {
-	In                io.Reader
-	Out               io.Writer
-	Err               io.Writer
-	EnvPath           string
-	Home              string
-	Builtins          map[string]Command
-	CustomExecutables []string
+	In       io.Reader
+	Out      io.Writer
+	Err      io.Writer
+	EnvPath  string
+	Home     string
+	Builtins map[string]Command
+	Files    struct {
+		CustomExecutables []string
+		OtherFiles        [][]rune
+	}
 }
 
 type ShellCompleter struct {
@@ -30,14 +33,21 @@ type ShellCompleter struct {
 func NewShell() *Shell {
 	path, _ := os.LookupEnv("PATH")
 	home, _ := os.LookupEnv("HOME")
+	cExec, Ofiles := getPossileExecutables(path)
 	return &Shell{
-		In:                os.Stdin,
-		Out:               os.Stdout,
-		Err:               os.Stderr,
-		EnvPath:           path,
-		Home:              home,
-		Builtins:          make(map[string]Command),
-		CustomExecutables: getPossileExecutables(path),
+		In:       os.Stdin,
+		Out:      os.Stdout,
+		Err:      os.Stderr,
+		EnvPath:  path,
+		Home:     home,
+		Builtins: make(map[string]Command),
+		Files: struct {
+			CustomExecutables []string
+			OtherFiles        [][]rune
+		}{
+			CustomExecutables: cExec,
+			OtherFiles:        Ofiles,
+		},
 	}
 }
 
@@ -56,13 +66,25 @@ func (s *ShellCompleter) Do(line []rune, pos int) ([][]rune, int) {
 
 	fields := strings.Fields(prefix)
 
-	if len(fields) > 1 || strings.HasPrefix(prefix, " ") || strings.TrimSpace(prefix) == "" {
+	if strings.TrimSpace(prefix) == "" {
 		return nil, 0
 	}
 
 	current := fields[0]
 	seen := make(map[string]bool, 0)
 	var matches []string
+
+	if len(fields) > 1 {
+		file := fields[len(fields)-1]
+		for _, f := range s.Files.OtherFiles {
+			if strings.HasPrefix(string(f), file) {
+				if !seen[string(f)] {
+					seen[string(f)] = true
+					matches = append(matches, string(f))
+				}
+			}
+		}
+	}
 
 	for cmd := range s.Builtins {
 		if strings.HasPrefix(cmd, current) {
@@ -74,7 +96,7 @@ func (s *ShellCompleter) Do(line []rune, pos int) ([][]rune, int) {
 
 	}
 
-	for _, cmd := range s.CustomExecutables {
+	for _, cmd := range s.Files.CustomExecutables {
 		if strings.HasPrefix(cmd, current) {
 			if !seen[cmd] {
 				seen[cmd] = true
@@ -145,8 +167,9 @@ func longestCommonPrefix(strs []string) string {
 	return prefix
 }
 
-func getPossileExecutables(path string) []string {
+func getPossileExecutables(path string) ([]string, [][]rune) {
 	possibleExecutable := make([]string, 0)
+	allFiles := make([][]rune, 0)
 
 	seen := make(map[string]bool, 0)
 
@@ -175,10 +198,11 @@ func getPossileExecutables(path string) []string {
 				possibleExecutable = append(possibleExecutable, name)
 				seen[name] = true
 			}
+			allFiles = append(allFiles, []rune(name))
 
 		}
 
 	}
 
-	return possibleExecutable
+	return possibleExecutable, allFiles
 }
