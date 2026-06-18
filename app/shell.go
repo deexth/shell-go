@@ -22,8 +22,8 @@ type Shell struct {
 
 type ShellCompleter struct {
 	*Shell
-	RlInstance *readline.Instance // Reference to refresh the prompt line
-	LastLine   string             // Tracks the current input text state
+	RlInstance *readline.Instance
+	LastLine   string
 	TabCount   int
 }
 
@@ -102,7 +102,7 @@ func (s *ShellCompleter) Do(line []rune, pos int) ([][]rune, int) {
 	if len(lcp) > len(current) {
 		s.LastLine = ""
 		s.TabCount = 0
-		suffix := lcp[len(current):] // Extract only the un-typed portion of the prefix
+		suffix := lcp[len(current):]
 		return [][]rune{[]rune(suffix)}, len(current)
 	}
 
@@ -182,26 +182,3 @@ func getPossileExecutables(path string) []string {
 
 	return possibleExecutable
 }
-
-// func sortMatches(matches [][]rune) [][]rune {
-// 	for i := 1; i < len(matches); i++ {
-// 		for j := i; j > 0; j-- {
-// 			if string(matches[j-1]) <= string(matches[j]) {
-// 				break
-// 			}
-//
-// 			matches[j-1], matches[j] = matches[j], matches[j-1]
-// 		}
-// 	}
-// 	return matches
-// }
-
-// func (s *Shell) BuildCompleter() *readline.PrefixCompleter {
-// 	cmds := make([]readline.PrefixCompleterInterface, 0)
-//
-// 	for builtin := range s.Builtins {
-// 		cmds = append(cmds, readline.PcItem(builtin))
-// 	}
-//
-// 	return readline.NewPrefixCompleter(cmds...)
-// }
