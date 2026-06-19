@@ -31,7 +31,6 @@ type ShellCompleter struct {
 func NewShell() *Shell {
 	path, _ := os.LookupEnv("PATH")
 	home, _ := os.LookupEnv("HOME")
-	cExec, Ofiles := getPossileExecutables(path)
 	return &Shell{
 		In:          os.Stdin,
 		Out:         os.Stdout,
@@ -125,9 +124,7 @@ func (s *ShellCompleter) completeCommand(line []rune, pos int, partial string) (
 		}
 	}
 
-	return sc.applyMatches(line, pos, partial, matches)
-
-	return nil, 0
+	return s.applyMatches(line, pos, partial, matches)
 }
 
 func (s *ShellCompleter) applyMatches(line []rune, pos int, partial string, matches []string) ([][]rune, int) {
@@ -167,7 +164,7 @@ func (s *ShellCompleter) applyMatches(line []rune, pos int, partial string, matc
 	}
 
 	fmt.Print(s.Out, "\n")
-	fmt.Fprintln(s.Out, strings.Jon(matches, " "))
+	fmt.Fprintln(s.Out, strings.Join(matches, " "))
 	if s.RlInstance != nil {
 		s.RlInstance.Refresh()
 	}
