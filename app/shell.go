@@ -176,7 +176,7 @@ func (s *ShellCompleter) applyMatches(line []rune, pos int, partial string, matc
 }
 
 func (s *ShellCompleter) ringBell() {
-	s.Out.Write([]byte('\x07'))
+	s.Out.Write([]byte{'\x07'})
 }
 
 func (s *ShellCompleter) resetTabState() {
