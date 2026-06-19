@@ -167,7 +167,7 @@ func (s *ShellCompleter) applyMatches(line []rune, pos int, partial string, matc
 	}
 
 	fmt.Print(s.Out, "\n")
-	fmt.Fprintln(s.out, strings.Jon(matches, " "))
+	fmt.Fprintln(s.Out, strings.Jon(matches, " "))
 	if s.RlInstance != nil {
 		s.RlInstance.Refresh()
 	}
