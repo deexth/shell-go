@@ -54,7 +54,6 @@ func NewShellCompleter(s *Shell) *ShellCompleter {
 
 func (s *ShellCompleter) Do(line []rune, pos int) ([][]rune, int) {
 	prefix := string(line[:pos])
-	fmt.Print(string(line))
 
 	if strings.TrimSpace(prefix) == "" {
 		return nil, 0
