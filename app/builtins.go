@@ -92,8 +92,10 @@ func (c *CompleteCommand) Execute(args []string, s *Shell) error {
 	remaining := c.flag.Args()
 	switch {
 	case *register:
-		c.values = map[string]string{
-			remaining[1]: remaining[0],
+		if len(remaining) > 1 {
+			c.values = map[string]string{
+				remaining[1]: remaining[0],
+			}
 		}
 	case *print:
 		if *register {
