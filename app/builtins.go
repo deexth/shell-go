@@ -87,18 +87,17 @@ func (c *CompleteCommand) Execute(args []string, s *Shell) error {
 		return err
 	}
 
-	c.values = make(map[string]string)
+	// c.values = make(map[string]string)
 
 	remaining := c.flag.Args()
-	if *register {
+	switch {
+	case *register:
 		c.values = map[string]string{
 			remaining[1]: remaining[0],
 		}
-	}
-
-	if *print {
+	case *print:
 		if *register {
-			fmt.Fprintf(s.Out, "complete -C '%s' %s", remaining[1], c.values[remaining[1]])
+			fmt.Fprintf(s.Out, "complete -C '%s' %s", remaining[0], c.values[remaining[0]])
 		} else {
 			fmt.Fprintf(s.Out, "complete: %s: no completion specification\n", remaining[0])
 		}
