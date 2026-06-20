@@ -78,8 +78,8 @@ type CompleteCommand struct {
 
 func (c *CompleteCommand) Execute(args []string, s *Shell) error {
 	c.flag = pflag.NewFlagSet("complete", pflag.ContinueOnError)
-	print := c.flag.BoolP("print", "p", true, "prints the completion specification registered for the command")
-	register := c.flag.BoolP("register", "C", true, "registers a completer script for the command")
+	registered := c.flag.BoolP("print", "p", false, "prints the completion specification registered for the command")
+	register := c.flag.BoolP("register", "C", false, "registers a completer script for the command")
 
 	err := c.flag.Parse(args)
 	if err != nil {
@@ -92,9 +92,10 @@ func (c *CompleteCommand) Execute(args []string, s *Shell) error {
 		if len(remaining) > 1 {
 			s.FlagArgs[remaining[1]] = remaining[0]
 		}
-	case *print:
-		if *register {
-			fmt.Fprintf(s.Out, "complete -C '%s' %s", remaining[0], s.FlagArgs[remaining[0]])
+
+	case *registered:
+		if v, ok := s.FlagArgs[remaining[0]]; ok {
+			fmt.Fprintf(s.Out, "complete -C '%s' %s\n", v, remaining[0])
 		} else {
 			fmt.Fprintf(s.Out, "complete: %s: no completion specification\n", remaining[0])
 		}
