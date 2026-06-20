@@ -87,7 +87,7 @@ func (c *CompleteCommand) Execute(args []string, s *Shell) error {
 		return err
 	}
 
-	// c.values = make(map[string]string)
+	c.values = make(map[string]string)
 
 	remaining := c.flag.Args()
 	switch {
