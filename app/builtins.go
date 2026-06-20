@@ -90,12 +90,13 @@ func (c *CompleteCommand) Execute(args []string, s *Shell) error {
 	c.values = make(map[string]string)
 
 	remaining := c.flag.Args()
-	switch {
-	case *register:
+	if *register {
 		c.values = map[string]string{
 			remaining[1]: remaining[0],
 		}
-	case *print:
+	}
+
+	if *print {
 		if *register {
 			fmt.Fprintf(s.Out, "complete -C '%s' %s", remaining[1], c.values[remaining[1]])
 		} else {
