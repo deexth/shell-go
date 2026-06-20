@@ -84,7 +84,7 @@ func (c *CompleteCommand) Execute(args []string, s *Shell) error {
 	}
 
 	if *print {
-		fmt.Fprintf(s.Out, "complete: %s: no completion specification\n", args[0])
+		fmt.Fprintf(s.Out, "complete: %s: no completion specification\n", args[1])
 	}
 	return nil
 }
