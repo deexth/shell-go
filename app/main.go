@@ -5,29 +5,16 @@ import (
 	"os"
 
 	"github.com/chzyer/readline"
-	"github.com/spf13/pflag"
 )
 
 func main() {
 	sh := NewShell()
-	sh.Register("pwd", &PwdCommand{
-		flag: pflag.NewFlagSet("pwd", pflag.ContinueOnError),
-	})
-	sh.Register("echo", &EchoCommand{
-		flag: pflag.NewFlagSet("pwd", pflag.ContinueOnError),
-	})
-	sh.Register("exit", &ExitCommand{
-		flag: pflag.NewFlagSet("pwd", pflag.ContinueOnError),
-	})
-	sh.Register("type", &TypeCommand{
-		flag: pflag.NewFlagSet("pwd", pflag.ContinueOnError),
-	})
-	sh.Register("cd", &CdCommand{
-		flag: pflag.NewFlagSet("pwd", pflag.ContinueOnError),
-	})
-	sh.Register("complete", &CompleteCommand{
-		flag: pflag.NewFlagSet("pwd", pflag.ContinueOnError),
-	})
+	sh.Register("pwd", &PwdCommand{})
+	sh.Register("echo", &EchoCommand{})
+	sh.Register("exit", &ExitCommand{})
+	sh.Register("type", &TypeCommand{})
+	sh.Register("cd", &CdCommand{})
+	sh.Register("complete", &CompleteCommand{})
 
 	completer := NewShellCompleter(sh)
 
