@@ -79,15 +79,30 @@ type CompleteCommand struct {
 func (c *CompleteCommand) Execute(args []string, s *Shell) error {
 	c.flag = pflag.NewFlagSet("complete", pflag.ContinueOnError)
 	print := c.flag.BoolP("print", "p", true, "prints the completion specification registered for the command")
+	register := c.flag.BoolP("register", "C", true, "registers a completer script for the command")
+
 	err := c.flag.Parse(args)
 	if err != nil {
 		return err
 	}
 
 	remaining := c.flag.Args()
-
-	if *print {
-		fmt.Fprintf(s.Out, "complete: %s: no completion specification\n", remaining[0])
+	var values = make(map[string]string)
+	switch {
+	case *register:
+		values = map[string]string{
+			remaining[1]: remaining[0],
+		}
+	case *print:
+		if *register {
+			fmt.Fprintf(s.Out, "complete -C '%s' %s", remaining[1], values[remaining[1]])
+		} else {
+			fmt.Fprintf(s.Out, "complete: %s: no completion specification\n", remaining[0])
+		}
 	}
+
+	// if *print {
+	// 	fmt.Fprintf(s.Out, "complete: %s: no completion specification\n", remaining[0])
+	// }
 	return nil
 }
