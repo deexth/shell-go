@@ -14,6 +14,7 @@ func main() {
 	sh.Register("exit", &ExitCommand{})
 	sh.Register("type", &TypeCommand{})
 	sh.Register("cd", &CdCommand{})
+	sh.Register("complete", &CompleteCommand{})
 
 	completer := NewShellCompleter(sh)
 

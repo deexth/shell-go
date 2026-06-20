@@ -59,3 +59,9 @@ func (c *CdCommand) Execute(args []string, s *Shell) error {
 	}
 	return nil
 }
+
+type CompleteCommand struct{}
+
+func (c *CompleteCommand) Execute(args []string, s *Shell) error {
+	return nil
+}
