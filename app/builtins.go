@@ -4,9 +4,13 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/spf13/pflag"
 )
 
-type PwdCommand struct{}
+type PwdCommand struct {
+	flag *pflag.FlagSet
+}
 
 func (c *PwdCommand) Execute(args []string, s *Shell) error {
 	cwd, err := os.Getwd()
@@ -17,21 +21,27 @@ func (c *PwdCommand) Execute(args []string, s *Shell) error {
 	return nil
 }
 
-type EchoCommand struct{}
+type EchoCommand struct {
+	flag *pflag.FlagSet
+}
 
 func (c *EchoCommand) Execute(args []string, s *Shell) error {
 	fmt.Fprintln(s.Out, strings.Join(args, " "))
 	return nil
 }
 
-type ExitCommand struct{}
+type ExitCommand struct {
+	flag *pflag.FlagSet
+}
 
 func (c *ExitCommand) Execute(args []string, s *Shell) error {
 	defer os.Exit(0)
 	return nil
 }
 
-type TypeCommand struct{}
+type TypeCommand struct {
+	flag *pflag.FlagSet
+}
 
 func (c *TypeCommand) Execute(args []string, s *Shell) error {
 	if len(args) > 1 {
@@ -46,7 +56,9 @@ func (c *TypeCommand) Execute(args []string, s *Shell) error {
 	return nil
 }
 
-type CdCommand struct{}
+type CdCommand struct {
+	flag *pflag.FlagSet
+}
 
 func (c *CdCommand) Execute(args []string, s *Shell) error {
 	path := args[0]
@@ -60,8 +72,19 @@ func (c *CdCommand) Execute(args []string, s *Shell) error {
 	return nil
 }
 
-type CompleteCommand struct{}
+type CompleteCommand struct {
+	flag *pflag.FlagSet
+}
 
 func (c *CompleteCommand) Execute(args []string, s *Shell) error {
+	print := c.flag.BoolP("print", "p", true, "prints the completion specification registered for the command")
+	err := c.flag.Parse(args)
+	if err != nil {
+		return err
+	}
+
+	if *print {
+		fmt.Fprintf(s.Out, "complete: %s: no completion specification\n", args[0])
+	}
 	return nil
 }
