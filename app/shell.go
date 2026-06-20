@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -162,8 +161,7 @@ func (s *ShellCompleter) applyMatches(line []rune, pos int, partial string, matc
 		return nil, 0
 	}
 
-	fmt.Print(s.Out, "\n")
-	fmt.Fprintln(s.Out, strings.Join(matches, " "))
+	s.Out.Write([]byte("\n" + strings.Join(matches, "  ") + "\n"))
 	if s.RlInstance != nil {
 		s.RlInstance.Refresh()
 	}
