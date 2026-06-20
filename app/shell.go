@@ -162,11 +162,11 @@ func (s *ShellCompleter) applyMatches(line []rune, pos int, partial string, matc
 		return nil, 0
 	}
 
-	w := s.Out
+	fmt.Print(s.Out, "\n")
+	fmt.Fprintln(s.Out, strings.Join(matches, " "))
 	if s.RlInstance != nil {
-		w = s.RlInstance.Stdout()
+		s.RlInstance.Refresh()
 	}
-	fmt.Fprintf(w, "\r\n%s\r\n", strings.Join(matches, "  "))
 
 	return nil, 0
 }
