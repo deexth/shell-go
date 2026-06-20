@@ -18,6 +18,7 @@ type Shell struct {
 	Home        string
 	Builtins    map[string]Command
 	Executables []string
+	FlagArgs    map[string]string
 }
 
 type ShellCompleter struct {
@@ -38,6 +39,7 @@ func NewShell() *Shell {
 		Home:        home,
 		Builtins:    make(map[string]Command),
 		Executables: findExecutables(path),
+		FlagArgs:    make(map[string]string),
 	}
 }
 

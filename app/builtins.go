@@ -73,8 +73,7 @@ func (c *CdCommand) Execute(args []string, s *Shell) error {
 }
 
 type CompleteCommand struct {
-	flag   *pflag.FlagSet
-	values map[string]string
+	flag *pflag.FlagSet
 }
 
 func (c *CompleteCommand) Execute(args []string, s *Shell) error {
@@ -87,19 +86,16 @@ func (c *CompleteCommand) Execute(args []string, s *Shell) error {
 		return err
 	}
 
-	c.values = make(map[string]string)
-
 	remaining := c.flag.Args()
 	switch {
 	case *register:
 		if len(remaining) > 1 {
-			c.values = map[string]string{
-				remaining[1]: remaining[0],
-			}
+			s.FlagArgs[remaining[1]] = remaining[0]
 		}
+		fmt.Fprintln(s.Out, s.FlagArgs)
 	case *print:
 		if *register {
-			fmt.Fprintf(s.Out, "complete -C '%s' %s", remaining[0], c.values[remaining[0]])
+			fmt.Fprintf(s.Out, "complete -C '%s' %s", remaining[0], s.FlagArgs[remaining[0]])
 		} else {
 			fmt.Fprintf(s.Out, "complete: %s: no completion specification\n", remaining[0])
 		}
