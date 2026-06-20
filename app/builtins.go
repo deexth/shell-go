@@ -92,7 +92,6 @@ func (c *CompleteCommand) Execute(args []string, s *Shell) error {
 		if len(remaining) > 1 {
 			s.FlagArgs[remaining[1]] = remaining[0]
 		}
-		fmt.Fprintln(s.Out, s.FlagArgs)
 	case *print:
 		if *register {
 			fmt.Fprintf(s.Out, "complete -C '%s' %s", remaining[0], s.FlagArgs[remaining[0]])
@@ -101,8 +100,5 @@ func (c *CompleteCommand) Execute(args []string, s *Shell) error {
 		}
 	}
 
-	// if *print {
-	// 	fmt.Fprintf(s.Out, "complete: %s: no completion specification\n", remaining[0])
-	// }
 	return nil
 }
