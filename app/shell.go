@@ -97,6 +97,7 @@ func (s *ShellCompleter) completeScript(
 
 	newout := strings.TrimSpace(out.String())
 	suffix := strings.TrimPrefix(newout, partial)
+	suffix += " "
 	// s.Out.Write([]byte("\n"))
 	// if s.RlInstance != nil {
 	// 	s.RlInstance.Refresh()
