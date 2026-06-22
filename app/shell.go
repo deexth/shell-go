@@ -96,10 +96,12 @@ func (s *ShellCompleter) completeScript(
 	}
 
 	newout := strings.TrimSpace(out.String())
-	suffix := strings.TrimPrefix(newout, partial)
-	if len(newout) > len(partial) {
-		suffix += " "
+	if newout == "" {
+		s.ringBell()
+		return nil, 0
 	}
+	suffix := strings.TrimPrefix(newout, partial)
+	suffix += " "
 
 	return [][]rune{[]rune(suffix)}, len(partial)
 }
