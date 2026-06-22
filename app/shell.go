@@ -92,12 +92,14 @@ func (s *ShellCompleter) completeScript(
 	cmd.Stdout = &out
 	err := cmd.Run()
 	if err != nil {
-		return [][]rune{[]rune("nothing")}, 0
+		return [][]rune{[]rune(partial)}, 0
 	}
 
 	newout := strings.TrimSpace(out.String())
 	suffix := strings.TrimPrefix(newout, partial)
-	suffix += " "
+	if len(newout) > len(partial) {
+		suffix += " "
+	}
 
 	return [][]rune{[]rune(suffix)}, len(partial)
 }
