@@ -3,6 +3,7 @@ package main
 import (
 	"io"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -69,13 +70,48 @@ func (s *ShellCompleter) Do(line []rune, pos int) ([][]rune, int) {
 		if !strings.HasSuffix(prefix, " ") {
 			partial = fields[len(fields)-1]
 		}
+
+		if script, ok := s.FlagArgs[fields[0]]; ok {
+			return s.completeScript(partial, script)
+		}
 		return s.completeFilename(line, pos, partial)
 	}
 
 	return s.completeCommand(line, pos, fields[0])
 }
 
-func (s *ShellCompleter) completeFilename(line []rune, pos int, partial string) ([][]rune, int) {
+func (s *ShellCompleter) completeScript(
+	partial,
+	script string,
+) (
+	[][]rune,
+	int,
+) {
+	cmd := exec.Command(script)
+	var out strings.Builder
+	cmd.Stdout = &out
+	err := cmd.Run()
+	if err != nil {
+		return [][]rune{[]rune("nothing")}, 0
+	}
+
+	newout := strings.TrimSpace(out.String())
+	suffix := strings.TrimPrefix(newout, partial)
+	// s.Out.Write([]byte("\n"))
+	// if s.RlInstance != nil {
+	// 	s.RlInstance.Refresh()
+	// }
+	return [][]rune{[]rune(suffix)}, len(partial)
+}
+
+func (s *ShellCompleter) completeFilename(
+	line []rune,
+	pos int,
+	partial string,
+) (
+	[][]rune,
+	int,
+) {
 	dir, filePrefix := filepath.Split(partial)
 	readDir := dir
 	if readDir == "" {
